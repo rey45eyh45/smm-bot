@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { 
   Shield, 
   Users, 
@@ -10,7 +10,6 @@ import {
   Check,
   X,
   Clock,
-  ChevronDown,
   Search,
   Wallet
 } from 'lucide-react'
@@ -66,7 +65,6 @@ const Admin = () => {
   const [loading, setLoading] = useState(true)
   const [orderFilter, setOrderFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [smmBalance, setSmmBalance] = useState<string>('')
 
   const fetchData = async () => {
@@ -114,7 +112,6 @@ const Admin = () => {
       
       if (res.ok) {
         fetchData()
-        setSelectedOrder(null)
       }
     } catch (error) {
       console.error('Update error:', error)
