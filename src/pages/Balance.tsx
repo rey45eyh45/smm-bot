@@ -21,7 +21,7 @@ const paymentMethods = [
 
 const Balance = () => {
   const { hapticFeedback, showAlert } = useTelegram()
-  const { user, transactions, fetchTransactions, deposit } = useStore()
+  const { user, transactions, fetchTransactions, deposit, setHideNavigation } = useStore()
   const [showDepositModal, setShowDepositModal] = useState(false)
   const [amount, setAmount] = useState('')
   const [selectedMethod, setSelectedMethod] = useState('')
@@ -32,6 +32,10 @@ const Balance = () => {
       fetchTransactions(user.telegram_id)
     }
   }, [user?.telegram_id])
+
+  useEffect(() => {
+    setHideNavigation(showDepositModal)
+  }, [showDepositModal])
 
   const handleDeposit = async () => {
     if (!amount || parseInt(amount) < 5000) {

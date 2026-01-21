@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowLeft, ChevronRight, Calculator, Clock, Info, ShoppingCart, Tag, Loader2 } from 'lucide-react'
 import { getCategoryById, getServiceIcon, formatPrice, formatNumber, Service } from '../data/services'
 import { useTelegram } from '../context/TelegramContext'
@@ -11,7 +11,7 @@ const ServiceDetail = () => {
   const { category } = useParams()
   const navigate = useNavigate()
   const { hapticFeedback, showAlert } = useTelegram()
-  const { user, createOrder } = useStore()
+  const { user, createOrder, setHideNavigation } = useStore()
   
   const categoryData = getCategoryById(category || '')
   const [selectedService, setSelectedService] = useState<Service | null>(null)
@@ -22,6 +22,10 @@ const ServiceDetail = () => {
   const [promoDiscount, setPromoDiscount] = useState(0)
   const [promoApplied, setPromoApplied] = useState(false)
   const [promoLoading, setPromoLoading] = useState(false)
+
+  useEffect(() => {
+    setHideNavigation(showOrderForm)
+  }, [showOrderForm])
 
   if (!categoryData) {
     return (

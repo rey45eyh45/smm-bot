@@ -50,6 +50,7 @@ interface AppState {
   transactions: Transaction[]
   isLoading: boolean
   error: string | null
+  hideNavigation: boolean
 
   // Actions
   setUser: (user: User | null) => void
@@ -57,6 +58,7 @@ interface AppState {
   setTransactions: (transactions: Transaction[]) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
+  setHideNavigation: (hide: boolean) => void
 
   // API Actions
   authUser: (userData: { telegram_id: number; first_name: string; last_name?: string; username?: string }) => Promise<void>
@@ -76,12 +78,14 @@ export const useStore = create<AppState>()(
       transactions: [],
       isLoading: false,
       error: null,
+      hideNavigation: false,
 
       setUser: (user) => set({ user }),
       setOrders: (orders) => set({ orders }),
       setTransactions: (transactions) => set({ transactions }),
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
+      setHideNavigation: (hideNavigation) => set({ hideNavigation }),
 
       authUser: async (userData) => {
         set({ isLoading: true, error: null })

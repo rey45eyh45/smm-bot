@@ -2,9 +2,11 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Navigation from './Navigation'
 import Header from './Header'
+import useStore from '../store/useStore'
 
 const Layout = () => {
   const location = useLocation()
+  const { hideNavigation } = useStore()
 
   return (
     <div className="min-h-screen bg-dark-400 flex flex-col">
@@ -34,7 +36,7 @@ const Layout = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <Navigation />
+      {!hideNavigation && <Navigation />}
     </div>
   )
 }
