@@ -11,6 +11,13 @@ config()
 const app = express()
 const PORT = process.env.PORT || 3001
 
+// Debug: Environment variables
+console.log('=== Environment Variables ===')
+console.log('BOT_TOKEN exists:', !!process.env.BOT_TOKEN)
+console.log('BOT_TOKEN length:', process.env.BOT_TOKEN?.length || 0)
+console.log('FRONTEND_URL:', process.env.FRONTEND_URL)
+console.log('=============================')
+
 // Referral sozlamalari
 const REFERRAL_BONUS = parseInt(process.env.REFERRAL_BONUS) || 5000
 const REFERRAL_PERCENT = parseInt(process.env.REFERRAL_PERCENT) || 10
