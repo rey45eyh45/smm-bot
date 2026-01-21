@@ -15,11 +15,14 @@ const PORT = process.env.PORT || 3001
 const REFERRAL_BONUS = parseInt(process.env.REFERRAL_BONUS) || 5000
 const REFERRAL_PERCENT = parseInt(process.env.REFERRAL_PERCENT) || 10
 
+// Frontend URL
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://charismatic-serenity-production-fd37.up.railway.app'
+
 // Telegram Bot
 let bot = null
 if (process.env.BOT_TOKEN && process.env.BOT_TOKEN !== 'your_bot_token_here') {
   bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true })
-  console.log('✅ Telegram bot ulandi')
+  console.log('Telegram bot ulandi')
   
   // Bot commands
   bot.onText(/\/start(.*)/, async (msg, match) => {
@@ -27,28 +30,27 @@ if (process.env.BOT_TOKEN && process.env.BOT_TOKEN !== 'your_bot_token_here') {
     const referralCode = match[1]?.trim()
     
     const welcomeMessage = `
-🎉 *SMM Bot'ga xush kelibsiz!*
+*SMM Bot'ga xush kelibsiz!*
 
-📱 Ijtimoiy tarmoqlaringizni rivojlantiring:
-• Telegram - obunachi, ko'rishlar, reaksiyalar
-• Instagram - followers, likes, views
-• YouTube - subscribers, views, likes
-• TikTok - followers, likes, views
+Ijtimoiy tarmoqlaringizni rivojlantiring:
+- Telegram - obunachi, ko'rishlar, reaksiyalar
+- Instagram - followers, likes, views
+- YouTube - subscribers, views, likes
+- TikTok - followers, likes, views
 
-💰 *Yangi foydalanuvchilarga 10,000 so'm bonus!*
+*Yangi foydalanuvchilarga 10,000 so'm bonus!*
 
-🎁 Promo kod: \`YANGI20\` - 20% chegirma
+Promo kod: YANGI20 - 20% chegirma
 
-� *Buyruqlar:*
+*Buyruqlar:*
 /balance - Balansni ko'rish
 /orders - Buyurtmalar tarixi
-/help - Yordam
-
-⚠️ _Mini App hozirda ishlab chiqish rejimida. Tayyor bo'lganda HTTPS bilan ishga tushiriladi._`
+/help - Yordam`
 
     const keyboard = {
       inline_keyboard: [
-        [{ text: '📞 Qo\'llab-quvvatlash', url: 'https://t.me/ilomswe' }]
+        [{ text: 'Ilovani ochish', web_app: { url: FRONTEND_URL } }],
+        [{ text: 'Qollab-quvvatlash', url: 'https://t.me/ilomswe' }]
       ]
     }
     
@@ -59,21 +61,20 @@ if (process.env.BOT_TOKEN && process.env.BOT_TOKEN !== 'your_bot_token_here') {
       })
     } catch (err) {
       console.log('Start xabar xatosi:', err.message)
-      // Oddiy xabar yuborish
-      await bot.sendMessage(chatId, welcomeMessage.replace(/\*/g, '').replace(/`/g, '').replace(/_/g, ''))
+      await bot.sendMessage(chatId, welcomeMessage.replace(/\*/g, ''))
     }
   })
   
   bot.onText(/\/help/, async (msg) => {
     const helpMessage = `
-📚 *Yordam*
+*Yordam*
 
-🔹 /start - Botni ishga tushirish
-🔹 /balance - Balansni ko'rish
-🔹 /orders - Buyurtmalar tarixi
-🔹 /help - Yordam
+/start - Botni ishga tushirish
+/balance - Balansni ko'rish
+/orders - Buyurtmalar tarixi
+/help - Yordam
 
-❓ Savollar bo'lsa, qo'llab-quvvatlash xizmatiga murojaat qiling.`
+Savollar bo'lsa, qo'llab-quvvatlash xizmatiga murojaat qiling.`
     
     await bot.sendMessage(msg.chat.id, helpMessage, { parse_mode: 'Markdown' })
   })
@@ -81,25 +82,25 @@ if (process.env.BOT_TOKEN && process.env.BOT_TOKEN !== 'your_bot_token_here') {
   bot.onText(/\/balance/, async (msg) => {
     const user = database.getUser(msg.chat.id)
     if (user) {
-      await bot.sendMessage(msg.chat.id, `💰 Sizning balansngiz: *${user.balance.toLocaleString()} so'm*`, { parse_mode: 'Markdown' })
+      await bot.sendMessage(msg.chat.id, `Sizning balansngiz: *${user.balance.toLocaleString()} so'm*`, { parse_mode: 'Markdown' })
     } else {
-      await bot.sendMessage(msg.chat.id, '❌ Avval /start buyrug\'ini yuboring')
+      await bot.sendMessage(msg.chat.id, 'Avval /start buyrug\'ini yuboring')
     }
   })
   
   bot.onText(/\/orders/, async (msg) => {
     const orders = database.getOrdersByUser(msg.chat.id)
     if (orders.length === 0) {
-      await bot.sendMessage(msg.chat.id, '📦 Sizda hali buyurtmalar yo\'q')
+      await bot.sendMessage(msg.chat.id, 'Sizda hali buyurtmalar yo\'q')
       return
     }
     
     const lastOrders = orders.slice(0, 5)
-    let message = '📦 *Oxirgi buyurtmalar:*\n\n'
+    let message = '*Oxirgi buyurtmalar:*\n\n'
     
     lastOrders.forEach((order, i) => {
-      const statusEmoji = order.status === 'completed' ? '✅' : order.status === 'processing' ? '⏳' : '🕐'
-      message += `${i + 1}. ${statusEmoji} ${order.service_name}\n   💰 ${order.price.toLocaleString()} so'm\n\n`
+      const statusEmoji = order.status === 'completed' ? '[OK]' : order.status === 'processing' ? '[...]' : '[?]'
+      message += `${i + 1}. ${statusEmoji} ${order.service_name}\n   ${order.price.toLocaleString()} so'm\n\n`
     })
     
     await bot.sendMessage(msg.chat.id, message, { parse_mode: 'Markdown' })
@@ -202,14 +203,14 @@ app.post('/api/users/auth', async (req, res) => {
           // Referral count yangilash
           await database.incrementReferralCount(referrer.telegram_id)
           
-          console.log(`🎁 Referral bonus: ${referrer.first_name} <- ${first_name}`)
+          console.log(`Referral bonus: ${referrer.first_name} <- ${first_name}`)
           
           // Taklif qiluvchiga xabar
           sendUserNotification(referrer.telegram_id, `
-🎉 *Tabriklaymiz!*
+*Tabriklaymiz!*
 
-👤 ${first_name} sizning havolangiz orqali ro'yxatdan o'tdi!
-💰 Bonus: *${REFERRAL_BONUS.toLocaleString()} so'm*
+${first_name} sizning havolangiz orqali ro'yxatdan o'tdi!
+Bonus: *${REFERRAL_BONUS.toLocaleString()} so'm*
 
 Taklif qilishni davom eting va ko'proq bonus oling!
           `)
@@ -217,16 +218,16 @@ Taklif qilishni davom eting va ko'proq bonus oling!
       }
 
       user = database.getUser(telegram_id)
-      console.log(`🆕 Yangi foydalanuvchi: ${first_name} ${last_name || ''} (@${username || telegram_id})`)
+      console.log(`Yangi foydalanuvchi: ${first_name} ${last_name || ''} (@${username || telegram_id})`)
       
       // Adminga xabar
       sendAdminNotification(`
-🆕 *Yangi foydalanuvchi!*
-━━━━━━━━━━━━━━━━
-👤 ${first_name} ${last_name || ''}
-🆔 @${username || telegram_id}
-💰 Bonus: 10,000 so'm
-${referral_code ? `🎁 Referral: ${referral_code}` : ''}
+*Yangi foydalanuvchi!*
+----------------
+${first_name} ${last_name || ''}
+@${username || telegram_id}
+Bonus: 10,000 so'm
+${referral_code ? `Referral: ${referral_code}` : ''}
       `)
     }
 
@@ -285,10 +286,9 @@ app.post('/api/orders', async (req, res) => {
     try {
       smmResult = await smmApi.createOrder(service_id, link, quantity)
       smmOrderId = smmResult.order
-      console.log(`📤 SMM API buyurtma: ${smmOrderId} ${smmResult.demo ? '(demo)' : ''}`)
+      console.log(`SMM API buyurtma: ${smmOrderId} ${smmResult.demo ? '(demo)' : ''}`)
     } catch (smmError) {
       console.error('SMM API xato:', smmError.message)
-      // SMM API xatosi bo'lsa ham davom etamiz (demo rejim)
     }
 
     // Buyurtma yaratish
@@ -320,57 +320,56 @@ app.post('/api/orders', async (req, res) => {
 
     const updatedUser = database.getUser(telegram_id)
 
-    console.log(`🛒 Yangi buyurtma: ${order_id} - ${service_name} - ${price.toLocaleString()} so'm`)
+    console.log(`Yangi buyurtma: ${order_id} - ${service_name} - ${price.toLocaleString()} so'm`)
 
     // Adminga xabar yuborish
     sendAdminNotification(`
-🛒 *Yangi buyurtma!*
-━━━━━━━━━━━━━━━━
-📦 ID: \`${order_id}\`
-👤 ${user.first_name} (@${user.username || user.telegram_id})
-📌 ${service_name}
-🔗 ${link}
-📊 Miqdor: ${quantity.toLocaleString()}
-💰 Summa: ${price.toLocaleString()} so'm
+*Yangi buyurtma!*
+----------------
+ID: ${order_id}
+${user.first_name} (@${user.username || user.telegram_id})
+${service_name}
+Link: ${link}
+Miqdor: ${quantity.toLocaleString()}
+Summa: ${price.toLocaleString()} so'm
     `)
 
     // Foydalanuvchiga xabar
     sendUserNotification(telegram_id, `
-✅ *Buyurtmangiz qabul qilindi!*
+*Buyurtmangiz qabul qilindi!*
 
-📦 ID: \`${order_id}\`
-📌 ${service_name}
-📊 Miqdor: ${quantity.toLocaleString()}
-💰 Summa: ${price.toLocaleString()} so'm
+ID: ${order_id}
+${service_name}
+Miqdor: ${quantity.toLocaleString()}
+Summa: ${price.toLocaleString()} so'm
 
-⏳ Tez orada bajariladi...
+Tez orada bajariladi...
     `)
 
-    // Buyurtmani "processing" ga o'tkazish (5 soniyadan keyin)
+    // Buyurtmani "processing" ga o'tkazish
     setTimeout(async () => {
       await database.updateOrderStatus(order_id, 'processing', 10)
     }, 5000)
 
-    // Progress yangilash (15 soniyadan keyin)
+    // Progress yangilash
     setTimeout(async () => {
       const randomProgress = Math.floor(Math.random() * 40) + 30
       await database.updateOrderStatus(order_id, 'processing', randomProgress)
     }, 15000)
 
-    // Buyurtmani tugallash (30-60 soniyadan keyin)
+    // Buyurtmani tugallash
     setTimeout(async () => {
       await database.updateOrderStatus(order_id, 'completed', 100)
-      console.log(`✅ Buyurtma tugallandi: ${order_id}`)
+      console.log(`Buyurtma tugallandi: ${order_id}`)
       
-      // Foydalanuvchiga tugallangan xabari
       sendUserNotification(telegram_id, `
-🎉 *Buyurtma bajarildi!*
+*Buyurtma bajarildi!*
 
-📦 ID: \`${order_id}\`
-📌 ${service_name}
-📊 Miqdor: ${quantity.toLocaleString()}
+ID: ${order_id}
+${service_name}
+Miqdor: ${quantity.toLocaleString()}
 
-✅ Xizmat muvaffaqiyatli yetkazildi!
+Xizmat muvaffaqiyatli yetkazildi!
       `)
     }, 30000 + Math.random() * 30000)
 
@@ -440,29 +439,26 @@ app.post('/api/balance/deposit', async (req, res) => {
       description: `To'ldirish (${method})`
     })
 
-    // Demo rejimda avtomatik tasdiqlash (3 soniyadan keyin)
+    // Demo rejimda avtomatik tasdiqlash
     setTimeout(async () => {
-      // Balansga qo'shish
       await database.updateUserBalance(telegram_id, amount)
       
-      console.log(`💰 Balans to'ldirildi: ${user.first_name} - ${amount.toLocaleString()} so'm`)
+      console.log(`Balans to'ldirildi: ${user.first_name} - ${amount.toLocaleString()} so'm`)
       
-      // Adminga xabar
       sendAdminNotification(`
-💰 *Balans to'ldirildi!*
-━━━━━━━━━━━━━━━━
-👤 ${user.first_name} (@${user.username || user.telegram_id})
-💵 Summa: ${amount.toLocaleString()} so'm
-📱 Usul: ${method}
-🆔 TX: \`${tx_id}\`
+*Balans to'ldirildi!*
+----------------
+${user.first_name} (@${user.username || user.telegram_id})
+Summa: ${amount.toLocaleString()} so'm
+Usul: ${method}
+TX: ${tx_id}
       `)
       
-      // Foydalanuvchiga xabar
       sendUserNotification(telegram_id, `
-✅ *Balans to'ldirildi!*
+*Balans to'ldirildi!*
 
-💰 Summa: ${amount.toLocaleString()} so'm
-📱 Usul: ${method}
+Summa: ${amount.toLocaleString()} so'm
+Usul: ${method}
 
 Yangi balans: *${(user.balance + amount).toLocaleString()} so'm*
       `)
@@ -494,7 +490,6 @@ app.get('/api/transactions/:telegram_id', (req, res) => {
 
 // ==================== PROMO API ====================
 
-// Promo kodni tekshirish va qo'llash
 app.post('/api/promo/apply', async (req, res) => {
   try {
     const { telegram_id, code, order_amount } = req.body
@@ -517,7 +512,6 @@ app.post('/api/promo/apply', async (req, res) => {
       return res.status(400).json({ error: `Minimal buyurtma summasi: ${promo.min_amount} so'm` })
     }
 
-    // Foydalanuvchi avval ishlatganmi?
     const usage = database.checkPromoUsage(promo.id, telegram_id)
 
     if (usage) {
@@ -531,7 +525,6 @@ app.post('/api/promo/apply', async (req, res) => {
       discount = promo.discount_amount
     }
 
-    // Promo kodni ishlatilgan deb belgilash
     await database.usePromoCode(promo.id, telegram_id)
 
     res.json({ 
@@ -551,7 +544,6 @@ app.post('/api/promo/apply', async (req, res) => {
 
 // ==================== STATS API ====================
 
-// Statistika
 app.get('/api/stats/:telegram_id', (req, res) => {
   try {
     const telegram_id = parseInt(req.params.telegram_id)
@@ -593,7 +585,6 @@ app.get('/api/stats/:telegram_id', (req, res) => {
 
 const ADMIN_IDS = [parseInt(process.env.ADMIN_CHAT_ID) || 5425876649]
 
-// Admin tekshirish middleware
 const isAdmin = (req, res, next) => {
   const adminId = parseInt(req.headers['x-admin-id'] || req.query.admin_id)
   if (!ADMIN_IDS.includes(adminId)) {
@@ -602,7 +593,6 @@ const isAdmin = (req, res, next) => {
   next()
 }
 
-// Admin statistika
 app.get('/api/admin/stats', isAdmin, (req, res) => {
   try {
     const stats = database.getStats()
@@ -633,7 +623,6 @@ app.get('/api/admin/stats', isAdmin, (req, res) => {
   }
 })
 
-// Barcha buyurtmalar
 app.get('/api/admin/orders', isAdmin, (req, res) => {
   try {
     const { status, limit = 100 } = req.query
@@ -645,7 +634,6 @@ app.get('/api/admin/orders', isAdmin, (req, res) => {
     
     orders = orders.slice(0, parseInt(limit))
     
-    // User ma'lumotlarini qo'shish
     const ordersWithUser = orders.map(order => {
       const user = database.getUser(order.user_id)
       return {
@@ -664,7 +652,6 @@ app.get('/api/admin/orders', isAdmin, (req, res) => {
   }
 })
 
-// Barcha foydalanuvchilar
 app.get('/api/admin/users', isAdmin, (req, res) => {
   try {
     const { limit = 100 } = req.query
@@ -676,7 +663,6 @@ app.get('/api/admin/users', isAdmin, (req, res) => {
   }
 })
 
-// Buyurtma statusini yangilash
 app.put('/api/admin/orders/:order_id', isAdmin, async (req, res) => {
   try {
     const { order_id } = req.params
@@ -688,18 +674,16 @@ app.put('/api/admin/orders/:order_id', isAdmin, async (req, res) => {
       return res.status(404).json({ error: 'Buyurtma topilmadi' })
     }
     
-    // Foydalanuvchiga xabar
     if (status === 'completed') {
       sendUserNotification(order.user_id, `
-🎉 *Buyurtma bajarildi!*
+*Buyurtma bajarildi!*
 
-📦 ID: \`${order_id}\`
-📌 ${order.service_name}
+ID: ${order_id}
+${order.service_name}
 
-✅ Xizmat muvaffaqiyatli yetkazildi!
+Xizmat muvaffaqiyatli yetkazildi!
       `)
     } else if (status === 'cancelled') {
-      // Pulni qaytarish
       await database.updateUserBalance(order.user_id, order.price)
       await database.createTransaction({
         transaction_id: 'REFUND-' + Date.now().toString(36).toUpperCase(),
@@ -711,10 +695,10 @@ app.put('/api/admin/orders/:order_id', isAdmin, async (req, res) => {
       })
       
       sendUserNotification(order.user_id, `
-❌ *Buyurtma bekor qilindi*
+*Buyurtma bekor qilindi*
 
-📦 ID: \`${order_id}\`
-💰 Qaytarildi: ${order.price.toLocaleString()} so'm
+ID: ${order_id}
+Qaytarildi: ${order.price.toLocaleString()} so'm
       `)
     }
     
@@ -725,7 +709,6 @@ app.put('/api/admin/orders/:order_id', isAdmin, async (req, res) => {
   }
 })
 
-// Foydalanuvchi balansini yangilash
 app.put('/api/admin/users/:telegram_id/balance', isAdmin, async (req, res) => {
   try {
     const telegram_id = parseInt(req.params.telegram_id)
@@ -744,10 +727,10 @@ app.put('/api/admin/users/:telegram_id/balance', isAdmin, async (req, res) => {
     const user = database.getUser(telegram_id)
     
     sendUserNotification(telegram_id, `
-💰 *Balans yangilandi*
+*Balans yangilandi*
 
-${amount > 0 ? '➕' : '➖'} ${Math.abs(amount).toLocaleString()} so'm
-📝 Sabab: ${reason || 'Admin tomonidan'}
+${amount > 0 ? '+' : '-'} ${Math.abs(amount).toLocaleString()} so'm
+Sabab: ${reason || 'Admin tomonidan'}
 
 Yangi balans: *${user.balance.toLocaleString()} so'm*
     `)
@@ -759,7 +742,6 @@ Yangi balans: *${user.balance.toLocaleString()} so'm*
   }
 })
 
-// SMM Panel balansini tekshirish
 app.get('/api/admin/smm-balance', isAdmin, async (req, res) => {
   try {
     const balance = await smmApi.getBalance()
@@ -789,10 +771,10 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`
-╔════════════════════════════════════════╗
-║   🚀 SMM Bot Server ishga tushdi!      ║
-║   📍 Port: ${PORT}                          ║
-║   🌐 http://localhost:${PORT}              ║
-╚════════════════════════════════════════╝
+========================================
+   SMM Bot Server ishga tushdi!
+   Port: ${PORT}
+   http://localhost:${PORT}
+========================================
   `)
 })
