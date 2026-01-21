@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 
 const ADMIN_ID = 5425876649 // Admin Telegram ID
-const API_URL = 'http://localhost:3001/api'
+const API_URL = (import.meta as any).env?.VITE_API_URL || 'https://smm-bot-production-7f9d.up.railway.app/api'
 
 interface Stats {
   totalUsers: number
