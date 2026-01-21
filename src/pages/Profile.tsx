@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { 
   User, 
   Bell, 
@@ -12,11 +13,14 @@ import {
   Star,
   Gift,
   Copy,
-  Check
+  Check,
+  Settings
 } from 'lucide-react'
 import { useTelegram } from '../context/TelegramContext'
 import { useStore } from '../store/useStore'
 import { useState } from 'react'
+
+const ADMIN_ID = 5425876649
 
 const menuItems = [
   {
@@ -48,6 +52,9 @@ const Profile = () => {
   const { user: telegramUser, hapticFeedback, showConfirm, close } = useTelegram()
   const { user } = useStore()
   const [copied, setCopied] = useState(false)
+  const navigate = useNavigate()
+  
+  const isAdmin = user?.telegram_id === ADMIN_ID || telegramUser?.id === ADMIN_ID
 
   const copyReferralCode = () => {
     if (user?.referral_code) {
@@ -208,6 +215,24 @@ const Profile = () => {
             </div>
           </motion.div>
         ))}
+
+        {/* Admin Panel - faqat admin uchun */}
+        {isAdmin && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              hapticFeedback('heavy')
+              navigate('/admin')
+            }}
+            className="w-full glass-card rounded-xl p-4 flex items-center justify-center gap-2 text-primary-400 hover:bg-primary-500/10 transition-colors mb-3"
+          >
+            <Settings size={18} />
+            <span className="font-medium">Admin Panel</span>
+          </motion.button>
+        )}
 
         {/* Logout Button */}
         <motion.button
