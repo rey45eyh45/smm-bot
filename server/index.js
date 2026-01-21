@@ -47,11 +47,18 @@ Promo kod: YANGI20 - 20% chegirma
 /orders - Buyurtmalar tarixi
 /help - Yordam`
 
+    // Web App tugmasi faqat HTTPS uchun ishlaydi
+    const isHttps = FRONTEND_URL.startsWith('https://')
+    
     const keyboard = {
-      inline_keyboard: [
-        [{ text: 'Ilovani ochish', web_app: { url: FRONTEND_URL } }],
-        [{ text: 'Qollab-quvvatlash', url: 'https://t.me/ilomswe' }]
-      ]
+      inline_keyboard: isHttps 
+        ? [
+            [{ text: '🚀 Ilovani ochish', web_app: { url: FRONTEND_URL } }],
+            [{ text: '💬 Qollab-quvvatlash', url: 'https://t.me/ilomswe' }]
+          ]
+        : [
+            [{ text: '💬 Qollab-quvvatlash', url: 'https://t.me/ilomswe' }]
+          ]
     }
     
     try {
@@ -61,7 +68,10 @@ Promo kod: YANGI20 - 20% chegirma
       })
     } catch (err) {
       console.log('Start xabar xatosi:', err.message)
-      await bot.sendMessage(chatId, welcomeMessage.replace(/\*/g, ''))
+      // Markdown xatosi bo'lsa, oddiy text yuborish
+      await bot.sendMessage(chatId, welcomeMessage.replace(/\*/g, ''), {
+        reply_markup: keyboard
+      })
     }
   })
   
